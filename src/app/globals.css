@@ -1,0 +1,193 @@
+@import "tailwindcss";
+
+:root {
+  /* Gold-accented dark glassmorphism — pixel-matched from the imported
+     Claude Design file "booking design mockup" (gold accentColor
+     option: #d9a34a / light #f2cd8f / dark #b9772e). Dark-first: this used
+     to be the prefers-color-scheme:dark branch, now promoted to the only
+     palette, applied to both the public booking wizard and the admin panel. */
+  --accent-rgb: 217, 163, 74;
+  --accent-100: #f2cd8f;
+  --accent-500: #d9a34a;
+  --accent-900: #b9772e;
+  --danger-500: #e23e5c;
+  --danger-900: #9e1e3c;
+  --success-500: #1e9e72;
+  --success-900: #0d6a4b;
+
+  --background: radial-gradient(circle at 18% -10%, rgba(var(--accent-rgb), 0.18), transparent 55%),
+    linear-gradient(180deg, #0d1512 0%, #0a0f0d 55%, #070a09 100%);
+  --foreground: #f5f7f6;
+  --foreground-strong: rgba(245, 247, 246, 0.75);
+  --foreground-muted: rgba(245, 247, 246, 0.55);
+
+  --glass-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+  --glass-border: rgba(255, 255, 255, 0.16);
+  --glass-shadow: 0 24px 70px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(var(--accent-rgb), 0.13), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  --glass-blur: 32px;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-accent-100: var(--accent-100);
+  --color-accent-500: var(--accent-500);
+  --color-accent-900: var(--accent-900);
+  --color-danger-500: var(--danger-500);
+  --color-danger-900: var(--danger-900);
+  --color-success-500: var(--success-500);
+  --color-success-900: var(--success-900);
+  --font-display: var(--font-big-shoulders);
+  --font-sans: var(--font-manrope);
+}
+
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--accent-500);
+  color: #0b0f0d;
+}
+
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(24px, -18px); }
+}
+
+@keyframes floatBlob {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(24px, -26px) scale(1.1); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes floatBlob2 {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-20px, 22px) scale(1.06); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes titlePulse {
+  0%, 100% { opacity: 0.35; transform: translate(-50%, -50%) scale(1); }
+  50% { opacity: 0.6; transform: translate(-50%, -50%) scale(1.15); }
+}
+
+@keyframes glowPulseCurrent {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; }
+  50% { box-shadow: 0 0 16px 2px currentColor; }
+}
+
+@keyframes stepIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes selectPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shine {
+  0% { transform: translateX(-140%) rotate(8deg); }
+  100% { transform: translateX(240%) rotate(8deg); }
+}
+
+@keyframes strikeIn {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Strikes through the weekday label the moment it re-renders with no
+   weekly rule (just blocked) — a fresh server-rendered row plays this once
+   on mount, same trick as the other one-shot animations in this file. */
+.strike-through {
+  position: relative;
+}
+.strike-through::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 2px;
+  background: var(--danger-500);
+  transform-origin: left;
+  animation: strikeIn 420ms 80ms cubic-bezier(.16,1,.3,1) both;
+}
+
+@keyframes popIn {
+  0% { transform: scale(0.7); opacity: 0; }
+  60% { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes checkDraw {
+  from { stroke-dashoffset: 48; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Thin gold-accented scrollbar for small internal-scroll panels (e.g. a
+   busy day's appointment list in the admin week agenda) — the default
+   scrollbar reads as a generic OS control against the glass surfaces. */
+.thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--accent-900) transparent;
+}
+.thin-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.thin-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--accent-900);
+  border-radius: 999px;
+}
+.thin-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-500);
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  filter: blur(2px);
+  animation: orb-drift 28s ease-in-out infinite;
+}
+
+@layer components {
+  .glass-surface {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%);
+    border-radius: 1.5rem;
+  }
+
+  .font-display {
+    font-family: var(--font-big-shoulders), system-ui, sans-serif;
+    letter-spacing: -0.02em;
+  }
+
+  /* Shine-sweep primary CTA — the ::after diagonal highlight can't be done
+     with inline styles, so it lives here as a reusable class. */
+  .cta-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-shine::after {
+    content: "";
+    position: absolute;
+    top: -60%;
+    left: 0;
+    width: 26%;
+    height: 220%;
+    background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+    animation: shine 2.8s ease-in-out infinite;
+    pointer-events: none;
+  }
+}

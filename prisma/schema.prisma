@@ -1,0 +1,60 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Service {
+  id              String        @id @default(cuid())
+  name            String
+  durationMinutes Int
+  price           Int
+  active          Boolean       @default(true)
+  appointments    Appointment[]
+  createdAt       DateTime      @default(now())
+}
+
+// The entire availability model, in one table: a date is open exactly
+// during the ranges listed here — zero rows means fully blocked. There is
+// no separate "weekly schedule" layer and no closed/open flag to resolve
+// against it; a lunch break or a single free hour before another job is
+// just a second (or narrower) row, not a different kind of thing. Every
+// date starts with zero rows (fully blocked) — the barber unblocks a date
+// by adding a row, same action whether it's a full day or one hour.
+model AvailabilityRange {
+  id         String   @id @default(cuid())
+  date       String // "YYYY-MM-DD"
+  horaInicio String // "HH:mm"
+  horaFin    String // "HH:mm"
+  createdAt  DateTime @default(now())
+
+  @@index([date])
+}
+
+model Appointment {
+  id             String   @id @default(cuid())
+  date           String // "YYYY-MM-DD"
+  horaInicio     String // "HH:mm"
+  horaFin        String // "HH:mm"
+  serviceId      String
+  service        Service  @relation(fields: [serviceId], references: [id])
+  // Snapshot of the service's price at booking time — revenue reports read
+  // this, never Service.price, so historical totals stay correct even if
+  // the barber changes prices later.
+  servicePriceSnapshot Int      @default(0)
+  clientName     String
+  clientPhone    String
+  clientEmail    String
+  status         String   @default("confirmed") // "confirmed" | "cancelled"
+  idempotencyKey String   @unique
+  // Opaque, unguessable token used by the self-cancellation link sent in the
+  // confirmation email — deliberately not the row id, so a client can't
+  // cancel someone else's appointment by guessing/incrementing an id.
+  cancelToken    String   @unique @default(cuid())
+  createdAt      DateTime @default(now())
+
+  @@unique([date, horaInicio])
+}
